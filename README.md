@@ -2,7 +2,7 @@
 
 Single-page website for NN Glass (Pty) Ltd, Midrand. Plain HTML, CSS and JavaScript with one small PHP file for the enquiry form. No build step, framework or database: upload the files to any cPanel host and it runs.
 
-The design is the approved one-page concept (black/charcoal, white and electric cyan, serif headings), ported from `NN_Glass_Developer_Handover/website/index.html`. That folder is kept as the untouched original for reference and is not part of the live site.
+The design is the approved one-page concept (black/charcoal, white and electric cyan, serif headings), ported from the prototype in the developer handover package. The package itself is not kept in this repository; the original is the attachment on the project email.
 
 ## Current state: concept preview
 
@@ -52,7 +52,7 @@ Then open http://127.0.0.1:8000. Email will not send locally, but enquiries are 
 
 ## Deploying (cPanel)
 
-1. Upload everything to `public_html` **except** `.git`, `README.md` and `NN_Glass_Developer_Handover/`.
+1. Upload everything to `public_html` **except** `.git` and `README.md`.
 2. Make sure hidden files are included: `.htaccess` and `storage/.htaccess`.
 3. Issue the free SSL certificate (AutoSSL / Let's Encrypt). `.htaccess` then forces HTTPS.
 4. Create the mailboxes and set them in `api/config.php`.

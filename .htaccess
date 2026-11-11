@@ -14,9 +14,6 @@
 </FilesMatch>
 Options -Indexes
 
-# The original design handover is reference material, not part of the site
-RedirectMatch 404 ^/NN_Glass_Developer_Handover(/|$)
-
 # Security headers
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
