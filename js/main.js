@@ -9,6 +9,9 @@
     return "https://wa.me/" + site.phoneIntl + "?text=" + encodeURIComponent(text || site.whatsappGreeting || "");
   }
 
+  /* ---- Preview / live mode ---- */
+  if (site.previewMode === false) document.documentElement.classList.add("is-live");
+
   /* ---- Contact details from config.js ---- */
   if (site.phoneIntl) {
     $$("[data-wa]").forEach(function (a) { a.href = waLink(); });
@@ -22,115 +25,93 @@
       a.href = "mailto:" + site.email;
       a.textContent = site.email;
     });
+    $$("[data-email-row]").forEach(function (row) { row.hidden = false; });
   }
-  if (site.socials) {
-    $$("[data-social]").forEach(function (a) {
-      var url = site.socials[a.getAttribute("data-social")];
-      var holder = a.parentElement.tagName === "LI" ? a.parentElement : a;
-      if (url) {
-        a.href = url;
-        holder.hidden = false;
-      } else {
-        holder.hidden = true;
-      }
-    });
-  }
+  var socials = site.socials || {};
+  $$("[data-social]").forEach(function (a) {
+    var url = socials[a.getAttribute("data-social")];
+    if (url) a.href = url;
+    a.hidden = !url;
+  });
+  $$("[data-social-pending]").forEach(function (el) {
+    el.hidden = Boolean(socials[el.getAttribute("data-social-pending")]);
+  });
   $("#year").textContent = new Date().getFullYear();
 
   /* ---- Mobile menu ---- */
-  var toggle = $(".nav-toggle");
-  var nav = $("#nav");
+  var toggle = $("#menu-toggle");
+  var nav = $("#primary-nav");
   function setMenu(open) {
+    nav.classList.toggle("open", open);
     toggle.setAttribute("aria-expanded", String(open));
-    nav.classList.toggle("is-open", open);
+    toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
   }
-  toggle.addEventListener("click", function () {
-    setMenu(toggle.getAttribute("aria-expanded") !== "true");
-  });
-  nav.addEventListener("click", function (e) {
-    if (e.target.closest("a")) setMenu(false);
-  });
-  document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") setMenu(false);
-  });
+  toggle.addEventListener("click", function () { setMenu(!nav.classList.contains("open")); });
+  nav.addEventListener("click", function (e) { if (e.target.closest("a")) setMenu(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") setMenu(false); });
+
+  /* ---- Floating WhatsApp button: step aside while the contact section is on screen ---- */
+  var float = $(".wa-float");
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(function (entries) {
+      float.classList.toggle("is-away", entries[0].isIntersecting);
+    }, { threshold: 0.15 }).observe($("#contact"));
+  }
 
   /* ---- Gallery ---- */
   var photos = (site.gallery || []).filter(function (p) { return p && p.src; });
   var grid = $("#gallery-grid");
-  var filters = $("#gallery-filters");
-  var visible = photos;
 
-  function renderGallery(category) {
-    visible = category ? photos.filter(function (p) { return p.category === category; }) : photos;
-    grid.textContent = "";
-    visible.forEach(function (p, i) {
-      var li = document.createElement("li");
-      li.className = "tile";
-      var btn = document.createElement("button");
-      btn.type = "button";
-      btn.setAttribute("data-index", i);
-      var img = document.createElement("img");
-      img.src = p.src;
-      img.alt = p.alt || "NN Glass completed project";
-      img.loading = "lazy";
-      img.decoding = "async";
-      btn.appendChild(img);
-      if (p.category) {
-        var tag = document.createElement("span");
-        tag.className = "tile__tag";
-        tag.textContent = p.category;
-        btn.appendChild(tag);
-      }
-      li.appendChild(btn);
-      grid.appendChild(li);
-    });
-  }
+  photos.forEach(function (p, i) {
+    var item = document.createElement("button");
+    item.type = "button";
+    item.className = "gallery-item";
+    item.setAttribute("data-index", i);
 
-  if (photos.length) {
-    var cats = [];
-    photos.forEach(function (p) {
-      if (p.category && cats.indexOf(p.category) === -1) cats.push(p.category);
-    });
-    if (cats.length > 1) {
-      [""].concat(cats).forEach(function (c, i) {
-        var b = document.createElement("button");
-        b.type = "button";
-        b.className = "chip";
-        b.textContent = c || "All";
-        b.setAttribute("aria-pressed", String(i === 0));
-        b.addEventListener("click", function () {
-          $$(".chip", filters).forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
-          b.setAttribute("aria-pressed", "true");
-          renderGallery(c);
-        });
-        filters.appendChild(b);
-      });
-      filters.hidden = false;
-    }
-    renderGallery("");
-  }
+    var frame = document.createElement("div");
+    frame.className = "gallery-img";
+    var img = document.createElement("img");
+    img.src = p.src;
+    img.alt = p.alt || p.title || "NN Glass project";
+    img.loading = "lazy";
+    img.decoding = "async";
+    frame.appendChild(img);
+
+    var caption = document.createElement("div");
+    caption.className = "photo-title";
+    var title = document.createElement("strong");
+    title.textContent = p.title || "";
+    var view = document.createElement("span");
+    view.textContent = "VIEW IMAGE →";
+    caption.appendChild(title);
+    caption.appendChild(view);
+
+    item.appendChild(frame);
+    item.appendChild(caption);
+    grid.appendChild(item);
+  });
 
   /* ---- Lightbox ---- */
   var box = $("#lightbox");
-  var boxImg = $("#lightbox-img");
-  var boxCap = $("#lightbox-cap");
+  var boxImg = $("#lightbox-image");
+  var boxCap = $("#lightbox-caption");
   var current = 0;
 
   function show(i) {
-    current = (i + visible.length) % visible.length;
-    boxImg.src = visible[current].src;
-    boxImg.alt = visible[current].alt || "";
-    boxCap.textContent = visible[current].alt || "";
+    current = (i + photos.length) % photos.length;
+    boxImg.src = photos[current].src;
+    boxImg.alt = photos[current].alt || "";
+    boxCap.textContent = photos[current].title || "";
   }
   grid.addEventListener("click", function (e) {
-    var btn = e.target.closest("button[data-index]");
-    if (!btn || !box.showModal) return;
-    show(Number(btn.getAttribute("data-index")));
+    var item = e.target.closest(".gallery-item");
+    if (!item || !box.showModal) return;
+    show(Number(item.getAttribute("data-index")));
     box.showModal();
   });
-  $(".lightbox__close").addEventListener("click", function () { box.close(); });
-  $(".lightbox__nav--prev").addEventListener("click", function () { show(current - 1); });
-  $(".lightbox__nav--next").addEventListener("click", function () { show(current + 1); });
+  $("#lightbox-close").addEventListener("click", function () { box.close(); });
+  $("#lightbox-prev").addEventListener("click", function () { show(current - 1); });
+  $("#lightbox-next").addEventListener("click", function () { show(current + 1); });
   box.addEventListener("click", function (e) { if (e.target === box) box.close(); });
   box.addEventListener("keydown", function (e) {
     if (e.key === "ArrowLeft") show(current - 1);
@@ -141,25 +122,35 @@
   var form = $("#enquiry-form");
   var status = $("#form-status");
   var submit = $("button[type=submit]", form);
+  var prompts = {
+    name: "Please enter your name.",
+    phone: "Please enter a contact number.",
+    service: "Please choose what you need.",
+    message: "Please tell us a little about your project."
+  };
   form.elements.started.value = Math.floor(Date.now() / 1000);
 
   function setStatus(text, kind) {
     status.textContent = text;
-    status.className = "form__status" + (kind ? " is-" + kind : "");
+    status.className = "form-status" + (kind ? " is-" + kind : "");
   }
 
-  function validate() {
-    var bad = $$("input, select, textarea", form).filter(function (el) { return !el.checkValidity(); })[0];
-    if (!bad) return true;
-    var label = bad.closest("label").firstChild.textContent.trim().toLowerCase();
-    setStatus(bad.validity.valueMissing ? "Please fill in your " + (label === "what do you need?" ? "message" : label) + "." : "Please check your " + label + ".", "error");
-    bad.focus();
-    return false;
+  // Returns true when the listed fields are filled in; otherwise shows a prompt.
+  function check(names) {
+    for (var i = 0; i < names.length; i++) {
+      var el = form.elements[names[i]];
+      if (!el.checkValidity()) {
+        setStatus(prompts[names[i]], "error");
+        el.focus();
+        return false;
+      }
+    }
+    return true;
   }
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    if (!validate()) return;
+    if (!check(["name", "phone", "service", "message"])) return;
     submit.disabled = true;
     setStatus("Sending…");
     fetch(form.action, {
@@ -184,15 +175,16 @@
   });
 
   $("#form-whatsapp").addEventListener("click", function () {
+    if (!check(["name", "message"])) return;
     var f = form.elements;
-    var lines = ["Hi NN Glass, I'd like a quote please."];
-    if (f.name.value.trim()) lines.push("Name: " + f.name.value.trim());
-    if (f.service.value) lines.push("Service: " + f.service.value);
-    if (f.message.value.trim()) lines.push(f.message.value.trim());
+    var lines = ["Hello NN Glass, I would like to enquire about a project.", "", "Name: " + f.name.value.trim()];
+    if (f.service.value) lines.push("Project: " + f.service.value);
+    lines.push("Details: " + f.message.value.trim());
+    setStatus("WhatsApp is opening with your message. Press send there to reach us.", "ok");
     window.open(waLink(lines.join("\n")), "_blank", "noopener");
   });
 
-  // Result of a no-JavaScript style submit that redirected back here.
+  // Result of a submit made with JavaScript unavailable, after the redirect back.
   var result = new URLSearchParams(location.search).get("enquiry");
   if (result === "sent") setStatus("Thank you — your enquiry has been sent. We will be in touch shortly.", "ok");
   if (result === "error") setStatus("We could not send your enquiry. Please call or WhatsApp us instead.", "error");
