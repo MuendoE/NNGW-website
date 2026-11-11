@@ -6,7 +6,7 @@ The design is the approved one-page concept (black/charcoal, white and electric 
 
 ## Current state: concept preview
 
-The site is in **preview mode**. It shows the "private design concept" strip, labels the stock photographs as stock, and tells search engines not to list it. See "Going live" for the switch.
+The site is in **preview mode**. It shows the "private design concept" strip and tells search engines not to list it. See "Going live" for the switch.
 
 ## What changed from the concept
 
@@ -28,7 +28,7 @@ Changed:
 Almost everything you will change day to day is in **`js/config.js`**:
 
 - **Phone / WhatsApp number, email, social links** — change the text between the quotes. An empty value hides that item.
-- **Gallery** — upload a photo to `images/gallery/`, then add one entry to the `gallery` list. Instructions and an example are in the file.
+- **Gallery** — upload a photo to `images/projects/`, then add one entry to the `gallery` list. Instructions and an example are in the file.
 
 Photo guidelines: JPG or WebP, about 1600px on the long side, under 300 KB each (squoosh.app does this in the browser). Genuine NN Glass projects only.
 
@@ -64,7 +64,7 @@ Backups: the Git repository is the backup of the site itself. `storage/enquiries
 
 Do not do these until the client has confirmed and genuine photographs are in.
 
-- [ ] Replace the hero photo, the "approach" photo and the three gallery samples with genuine NN Glass project photographs
+- [ ] Have the client confirm the photographs and captions (and that each property owner is happy for their home to be shown)
 - [ ] Set `previewMode: false` in `js/config.js`
 - [ ] Delete the `noindex` line in the `<head>` of `index.html`
 - [ ] Confirm the contact number (+27 78 486 5809, taken from the public Facebook page)
@@ -76,6 +76,6 @@ Do not do these until the client has confirmed and genuine photographs are in.
 - [ ] Have the client approve the wording
 - [ ] Submit the sitemap in Google Search Console and claim the Google Business Profile
 
-## Stock photographs
+## Photographs
 
-The four photographs under `images/sample/` are third-party stock from the concept. Their licence terms were not supplied. Embedded metadata credits `modern-home` to Max Vakhtbovych (2Eyes prod.) and `glass-wall` to Matheus Ferreira; the other two carry no credit. They must not appear on the live site.
+The photographs under `images/projects/` were supplied as NN Glass's own work. The stock photographs from the concept have been removed. Captions describe what is visible in each photo and still need the client's confirmation.
