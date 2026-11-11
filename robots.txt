@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /storage/
+
+Sitemap: https://www.nnglassbalustrade.co.za/sitemap.xml
