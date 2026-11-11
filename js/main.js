@@ -280,8 +280,9 @@
     var gr = grid.getBoundingClientRect();
     if (gr.bottom > 0 && gr.top < vh) {
       var gp = (vh - gr.top) / (vh + gr.height) - 0.5;
+      var cols = galleryItems.length === 4 ? 2 : 3;
       galleryItems.forEach(function (item, i) {
-        item.style.setProperty("--gy", ((i % 3 === 1 ? 70 : -55) * gp).toFixed(1));
+        item.style.setProperty("--gy", ((i % cols === 1 ? 70 : -55) * gp).toFixed(1));
       });
     }
   }

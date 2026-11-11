@@ -11,9 +11,9 @@
 window.NN_SITE = {
   /*
    * true  = concept preview: shows the "private design concept" strip and the
-   *         "stock photograph" labels.
-   * false = live site: hides all of those notices.
-   * Only switch to false once genuine NN Glass photographs are in place.
+   *         other concept notes.
+   * false = live site: hides them.
+   * Only switch to false once the client has approved the photographs and wording.
    */
   previewMode: true,
 
@@ -44,28 +44,28 @@ window.NN_SITE = {
    * To add a photo:
    *   1. Save it as a JPG or WebP, about 1600px on the long side, under 300 KB
    *      (squoosh.app does this for free in the browser).
-   *   2. Upload it to the images/gallery/ folder.
+   *   2. Upload it to the images/projects/ folder.
    *   3. Add a line to the list below, for example:
    *
-   *      { src: "images/gallery/staircase-balustrade.jpg",
+   *      { src: "images/projects/staircase-balustrade.jpg",
    *        title: "Staircase balustrade",
    *        alt: "Frameless glass balustrade on a staircase" },
    *
    * "title" is the caption under the photo. "alt" describes the photo for
    * Google and for visitors using screen readers.
-   *
-   * The three entries below are STOCK photographs from the concept.
-   * Delete them when the client's own photographs go in.
    */
   gallery: [
-    { src: "images/sample/glass-doors.webp",
-      title: "Windows & doors",
-      alt: "Black framed glass doors and windows" },
-    { src: "images/sample/architecture.webp",
-      title: "Modern glazing",
-      alt: "Contemporary architecture with glass facade" },
-    { src: "images/sample/modern-home-1600.webp",
-      title: "Light-filled spaces",
-      alt: "Modern house with expansive glass openings" }
+    { src: "images/projects/frameless-patio-enclosure.webp",
+      title: "Frameless patio enclosure",
+      alt: "Frameless glass panels enclosing a brick patio" },
+    { src: "images/projects/frameless-stacking-doors.webp",
+      title: "Frameless stacking doors",
+      alt: "Wide run of frameless stacking glass doors under a concrete canopy" },
+    { src: "images/projects/aluminium-entrance.webp",
+      title: "Double-volume entrance",
+      alt: "Aluminium-framed entrance door with windows above and alongside" },
+    { src: "images/projects/aluminium-windows-doors.webp",
+      title: "Windows & folding doors",
+      alt: "Black aluminium windows and folding doors fitted to a new build" }
   ]
 };
