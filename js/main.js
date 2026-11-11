@@ -45,6 +45,7 @@
     nav.classList.toggle("open", open);
     toggle.setAttribute("aria-expanded", String(open));
     toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    $(".site-header").classList.toggle("menu-open", open);
   }
   toggle.addEventListener("click", function () { setMenu(!nav.classList.contains("open")); });
   nav.addEventListener("click", function (e) { if (e.target.closest("a")) setMenu(false); });
@@ -182,6 +183,122 @@
     lines.push("Details: " + f.message.value.trim());
     setStatus("WhatsApp is opening with your message. Press send there to reach us.", "ok");
     window.open(waLink(lines.join("\n")), "_blank", "noopener");
+  });
+
+  /* ---- Motion: reveals on entry and scroll-linked effects ---- */
+  var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var header = $(".site-header");
+  var hero = $(".hero");
+
+  // Elements that rise into place the first time they scroll into view.
+  var revealSel = ".feature, .section-intro > *, .service-card, .section-note, .editorial-copy > *, " +
+    ".gallery-item, .gallery-notice, .social-band, .process-heading > *, .step, .contact-copy > *, .form-card, .footer-main > *";
+  if (!calm && "IntersectionObserver" in window) {
+    var revealer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        var el = entry.target;
+        revealer.unobserve(el);
+        // Stagger siblings that arrive together.
+        var peers = $$(".rv:not(.in)", el.parentElement).filter(function (x) { return x.parentElement === el.parentElement; });
+        el.style.transitionDelay = Math.min(peers.indexOf(el), 5) * 90 + "ms";
+        el.classList.add("in");
+        el.addEventListener("transitionend", function done(e) {
+          if (e.target !== el || e.propertyName !== "opacity") return;
+          el.removeEventListener("transitionend", done);
+          el.classList.remove("rv", "rv-h", "in");
+          el.style.transitionDelay = "";
+        });
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+    $$(revealSel).forEach(function (el) {
+      el.classList.add("rv");
+      if (/^H[1-3]$/.test(el.tagName)) el.classList.add("rv-h");
+      revealer.observe(el);
+    });
+  }
+
+  // Statement: wrap each word so it can brighten as the reader scrolls through.
+  var statement = $("#statement");
+  var words = [];
+  if (statement && !calm) {
+    (function wrap(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (child) {
+        if (child.nodeType === 1) return wrap(child);
+        if (child.nodeType !== 3) return;
+        var frag = document.createDocumentFragment();
+        child.textContent.split(/(\s+)/).forEach(function (part) {
+          if (!part) return;
+          if (/^\s+$/.test(part)) return frag.appendChild(document.createTextNode(" "));
+          var span = document.createElement("span");
+          span.className = "w";
+          span.textContent = part;
+          words.push(span);
+          frag.appendChild(span);
+        });
+        node.replaceChild(frag, child);
+      });
+    })(statement);
+  }
+
+  var photo = $(".editorial-photo");
+  var steps = $(".steps");
+  var galleryItems = $$(".gallery-item");
+  function clamp(n) { return Math.max(0, Math.min(1, n)); }
+
+  var ticking = false;
+  function frame() {
+    ticking = false;
+    var vh = window.innerHeight;
+    var doc = document.documentElement;
+    var hr = hero.getBoundingClientRect();
+    header.classList.toggle("at-top", hr.bottom > header.offsetHeight + 40);
+    header.style.setProperty("--sp", clamp(window.scrollY / (doc.scrollHeight - vh)).toFixed(4));
+    if (calm) return;
+
+    // Hero: photograph drifts and the headline lifts away.
+    if (hr.bottom > 0) hero.style.setProperty("--hp", clamp(-hr.top / hr.height).toFixed(4));
+
+    // Statement: words brighten one after another.
+    if (words.length) {
+      var sr = statement.getBoundingClientRect();
+      var sp = clamp((0.82 * vh - sr.top) / (0.5 * vh + sr.height * 0.6));
+      words.forEach(function (w, i) {
+        w.style.setProperty("--o", clamp(sp * (words.length + 3) - i).toFixed(3));
+      });
+    }
+
+    // Approach photograph: slow zoom-out inside its frame.
+    var pr = photo.getBoundingClientRect();
+    if (pr.bottom > 0 && pr.top < vh) photo.style.setProperty("--p", clamp((vh - pr.top) / (vh + pr.height)).toFixed(4));
+
+    // Process: the line beside the steps draws itself.
+    var st = steps.getBoundingClientRect();
+    steps.style.setProperty("--p", clamp((0.75 * vh - st.top) / st.height).toFixed(4));
+
+    // Gallery: the centre column drifts against the outer two.
+    var gr = grid.getBoundingClientRect();
+    if (gr.bottom > 0 && gr.top < vh) {
+      var gp = (vh - gr.top) / (vh + gr.height) - 0.5;
+      galleryItems.forEach(function (item, i) {
+        item.style.setProperty("--gy", ((i % 3 === 1 ? 70 : -55) * gp).toFixed(1));
+      });
+    }
+  }
+  function onScroll() {
+    if (!ticking) { ticking = true; requestAnimationFrame(frame); }
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  frame();
+
+  // Service cards: a soft glass highlight follows the pointer.
+  $$(".service-card").forEach(function (card) {
+    card.addEventListener("pointermove", function (e) {
+      var r = card.getBoundingClientRect();
+      card.style.setProperty("--mx", e.clientX - r.left + "px");
+      card.style.setProperty("--my", e.clientY - r.top + "px");
+    });
   });
 
   // Result of a submit made with JavaScript unavailable, after the redirect back.
